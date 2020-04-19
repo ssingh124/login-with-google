@@ -1,0 +1,116 @@
+<html>
+<head>
+
+</head>
+<body>
+<h1>Basic OAuth example using implicit flow</h1>
+<div id="buttons">
+<button type="button" onclick="myFunction()"> Login with Facebook </button>
+<button type="button" onclick="myFunctiongoogle()"> Login with Google </button>
+</div>
+<script>
+
+function myFunction()
+{
+
+if (!document.location.href.includes('access_token')) {
+
+  let client_id = '245555383168152';
+	  document.location.href= [`https://www.facebook.com/v3.2/dialog/oauth?client_id=${client_id}`,
+				   `redirect_uri=${document.location.href}`,
+				   `response_type=token`,
+				   `scope=email,public_profile`].join('&') ;
+	  
+      } 
+
+console.log('Got a token!!');
+
+
+var matches = document.location.href.match(/(.*)\#access_token\=(.*?)\&/);
+var app_url = matches[1];
+var token = matches[2];
+fetch('https://graph.facebook.com/v3.2/me?fields=name,email,picture', {
+
+headers:{
+"Authorization": `Bearer ${token}`
+}
+}).then(function(response) {
+
+console.log(response);
+if (response.status != 200) {
+document.location.href = app_url;
+token = null;
+}
+return response.json();
+}).then(function(myJson) {
+
+console.log(myJson);
+let userinfo = document.createElement('h2');
+userinfo.innerText = `Hello ${myJson.name}`;
+document.body.append(userinfo);
+
+let userpic = document.createElement('img');
+userpic.src = myJson.picture.data.url;
+document.body.append(userpic);
+
+
+});
+
+}
+
+function myFunctiongoogle()
+{
+if (!document.location.href.includes('access_token')) {
+
+
+let client_id = '186460191295-qit4fbuqjn1e1mfj3kbpmd9spq2ohth9.apps.googleusercontent.com';
+	  document.location.href= [`https://accounts.google.com/o/oauth2/v2/auth?client_id=${client_id}`,
+				   `response_type=token`,
+				   `redirect_uri=${document.location.href}`,
+				   `scope=openid email profile`].join('&') ;
+	  
+      } 
+
+
+var matches = document.location.href.match(/(.*)\#access_token\=(.*?)\&/);
+var app_url = matches[1];
+var token = matches[2];
+console.log(token);
+fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+
+headers:{
+"Authorization": `Bearer ${token}`
+
+}
+}).then(function(response) {
+// Extra error check, if we get an invalid response, it means that
+// our token is invalid. We will restart the login flow by
+// clearing the access_token
+	console.log("GFrom ");
+console.log(response);
+if (response.status != 200) {
+document.location.href = app_url;
+token = null;
+}
+return response.json();
+}).then(function(myJson) {
+
+console.log(myJson);
+let userinfo = document.createElement('h2');
+userinfo.innerText = `Hello ${myJson.name}`;
+document.body.append(userinfo);
+
+let userpic = document.createElement('img');
+userpic.src = myJson.picture;
+document.body.append(userpic);
+
+
+});
+
+}
+
+</script>
+
+
+</body>
+</html>
